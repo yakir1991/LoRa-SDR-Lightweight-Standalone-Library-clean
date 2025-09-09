@@ -42,11 +42,23 @@ struct Frame {
     std::vector<uint8_t> payload; // FRMPayload bytes
 };
 
-// Compute MIC over @p data using CRC32
-uint32_t compute_mic(const uint8_t* data, size_t len);
+// Compute the LoRaWAN MIC using AES-128 CMAC.
+// @param nwk_skey 16-byte network session key used for MIC calculation.
+// @param uplink  true for uplink frames, false for downlink.
+// @param devaddr Device address.
+// @param fcnt    32-bit frame counter.
+// @param data    Pointer to MHDR||FHDR||(FPort||FRMPayload) bytes.
+// @param len     Length of @p data in bytes.
+uint32_t compute_mic(const uint8_t nwk_skey[16],
+                     bool uplink,
+                     uint32_t devaddr,
+                     uint32_t fcnt,
+                     const uint8_t* data,
+                     size_t len);
 
 // Build @p frame into LoRa symbols using lora_phy::encode()
 ssize_t build_frame(lora_phy::lora_workspace* ws,
+                    const uint8_t nwk_skey[16],
                     const Frame& frame,
                     uint16_t* symbols,
                     size_t symbol_cap,
@@ -55,6 +67,7 @@ ssize_t build_frame(lora_phy::lora_workspace* ws,
 
 // Parse symbols back into a Frame verifying the MIC
 ssize_t parse_frame(lora_phy::lora_workspace* ws,
+                    const uint8_t nwk_skey[16],
                     const uint16_t* symbols,
                     size_t symbol_count,
                     Frame& out,

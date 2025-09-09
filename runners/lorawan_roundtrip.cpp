@@ -49,7 +49,8 @@ int main(int argc, char** argv) {
 
     std::vector<uint16_t> symbols(payload.size() * 2 + 32);
     std::vector<uint8_t> tmp(symbols.size() / 2 + 8);
-    ssize_t sc = lorawan::build_frame(&ws, frame, symbols.data(), symbols.size(),
+    uint8_t nwk_skey[16] = {};
+    ssize_t sc = lorawan::build_frame(&ws, nwk_skey, frame, symbols.data(), symbols.size(),
                                       tmp.data(), tmp.size());
     if (sc < 0) {
         std::cerr << "build_frame failed\n";
@@ -57,7 +58,7 @@ int main(int argc, char** argv) {
     }
 
     lorawan::Frame parsed;
-    ssize_t pc = lorawan::parse_frame(&ws, symbols.data(), static_cast<size_t>(sc),
+    ssize_t pc = lorawan::parse_frame(&ws, nwk_skey, symbols.data(), static_cast<size_t>(sc),
                                       parsed, tmp.data(), tmp.size());
     if (pc < 0) {
         std::cerr << "parse_frame failed\n";
