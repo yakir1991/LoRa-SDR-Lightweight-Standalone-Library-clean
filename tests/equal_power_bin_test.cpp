@@ -1,37 +1,17 @@
 #include <lora_phy/phy.hpp>
 #include <cstdint>
 #include <complex>
-#include <cstring>
-#include <string>
+#include <fstream>
+#include <iterator>
 #include <vector>
-
-// Simple base64 decoder used by existing tests.
-static std::vector<uint8_t> decode_base64(const std::string& in) {
-    std::vector<uint8_t> out;
-    int val = 0, valb = -8;
-    for (unsigned char c : in) {
-        int d;
-        if (c >= 'A' && c <= 'Z') d = c - 'A';
-        else if (c >= 'a' && c <= 'z') d = c - 'a' + 26;
-        else if (c >= '0' && c <= '9') d = c - '0' + 52;
-        else if (c == '+') d = 62;
-        else if (c == '/') d = 63;
-        else if (c == '=') break;
-        else continue;
-        val = (val << 6) | d;
-        valb += 6;
-        if (valb >= 0) {
-            out.push_back(static_cast<uint8_t>((val >> valb) & 0xFF));
-            valb -= 8;
-        }
-    }
-    return out;
-}
+#include <cstring>
+#include "base64_utils.hpp"
 
 int main() {
-    // Four complex samples: (1,0), (0,0), (1,0), (0,0)
-    const std::string iq_b64 = "AACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAA=";
-    auto bytes = decode_base64(iq_b64);
+    std::ifstream f("vectors/golden/equal_power_iq.b64");
+    if (!f) return 1;
+    std::string b64((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+    auto bytes = decode_base64(b64);
 
     const size_t sample_count = bytes.size() / (sizeof(float) * 2);
     std::vector<std::complex<float>> samples(sample_count);
