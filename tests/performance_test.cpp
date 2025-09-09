@@ -8,7 +8,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#ifdef __x86_64__
 #include <x86intrin.h>
+#endif
 
 struct Profile {
     std::string name;
@@ -101,7 +103,11 @@ int main() {
                                    scratch.data(), scratch.size());
 
         auto t_start = std::chrono::high_resolution_clock::now();
+#ifdef __x86_64__
         unsigned long long c_start = __rdtsc();
+#else
+        auto c_start = std::chrono::high_resolution_clock::now();
+#endif
 
         for (size_t pkt = 0; pkt < PACKETS; ++pkt) {
             lora_phy::lora_modulate(symbols.data(), symbol_count, samples.data(),
@@ -118,22 +124,36 @@ int main() {
                                       demod.data(), 1, nullptr);
         }
 
+#ifdef __x86_64__
         unsigned long long c_end = __rdtsc();
+#else
+        auto c_end = std::chrono::high_resolution_clock::now();
+#endif
         auto t_end = std::chrono::high_resolution_clock::now();
 
         lora_phy::lora_demod_free(&ws);
 
-        double seconds = std::chrono::duration<double>(t_end - t_start).count();
+        double seconds =
+            std::chrono::duration<double>(t_end - t_start).count();
         double pps = static_cast<double>(PACKETS) / seconds;
-        double cycles = static_cast<double>(c_end - c_start);
-        double cycles_per_symbol = cycles / (static_cast<double>(symbol_count) * PACKETS);
         unsigned N = 1u << p.sf;
-
+#ifdef __x86_64__
+        double cycles = static_cast<double>(c_end - c_start);
+        double cycles_per_symbol =
+            cycles / (static_cast<double>(symbol_count) * PACKETS);
         csv << run_id << ',' << p.name << ',' << p.sf << ',' << N << ','
             << pps << ',' << cycles_per_symbol << '\n';
         std::cout << '[' << run_id << "] " << p.name << ": " << pps
                   << " pps, " << cycles_per_symbol << " cycles/symbol"
                   << std::endl;
+#else
+        (void)c_start;
+        (void)c_end;
+        csv << run_id << ',' << p.name << ',' << p.sf << ',' << N << ','
+            << pps << ',' << "N/A" << '\n';
+        std::cout << '[' << run_id << "] " << p.name << ": " << pps
+                  << " pps, N/A cycles/symbol" << std::endl;
+#endif
     }
 
     return 0;
