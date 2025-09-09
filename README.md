@@ -98,7 +98,7 @@ The library includes comprehensive tests:
 ## Dependencies
 
 - **KISS-FFT**: Header-only FFT library (included)
-- **C++17**: Modern C++ features
+- **C++17**: Requires a C++17-compatible compiler
 - **CMake**: Build system
 
 ## License
