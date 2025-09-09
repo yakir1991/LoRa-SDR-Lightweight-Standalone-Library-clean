@@ -21,19 +21,19 @@ size_t lora_modulate(const uint16_t* symbols, size_t symbol_count,
     const uint16_t sw0 = static_cast<uint16_t>((sync >> 4) << shift);
     const uint16_t sw1 = static_cast<uint16_t>((sync & 0x0f) << shift);
 
-    const float f0 = (2.0f * float(M_PI) * sw0 * bw_scale) /
+    const float f0 = (2.0f * PI * sw0 * bw_scale) /
                      (float(N) * static_cast<float>(osr));
     genChirp(out_samples, static_cast<int>(N), static_cast<int>(osr),
              static_cast<int>(step), f0, false, amplitude, phase, bw_scale);
 
-    const float f1 = (2.0f * float(M_PI) * sw1 * bw_scale) /
+    const float f1 = (2.0f * PI * sw1 * bw_scale) /
                      (float(N) * static_cast<float>(osr));
     genChirp(out_samples + step, static_cast<int>(N), static_cast<int>(osr),
              static_cast<int>(step), f1, false, amplitude, phase, bw_scale);
 
     for (size_t s = 0; s < symbol_count; ++s)
     {
-        const float freq = (2.0f * float(M_PI) * symbols[s] * bw_scale) /
+        const float freq = (2.0f * PI * symbols[s] * bw_scale) /
                            (float(N) * static_cast<float>(osr));
         genChirp(out_samples + (s + 2) * step, static_cast<int>(N),
                  static_cast<int>(osr), static_cast<int>(step), freq, false,

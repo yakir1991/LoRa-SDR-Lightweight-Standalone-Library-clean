@@ -40,7 +40,7 @@ int init(lora_workspace* ws, const lora_params* cfg) {
         if (ws->window_kind == window_type::window_hann) {
             for (int i = 0; i < N; ++i) {
                 ws->window[i] =
-                    0.5f - 0.5f * std::cos(2.0f * float(M_PI) *
+                    0.5f - 0.5f * std::cos(2.0f * PI *
                                             static_cast<float>(i) /
                                             (static_cast<float>(N) - 1.0f));
             }
@@ -126,8 +126,8 @@ void estimate_offsets(lora_workspace* ws,
         float phase = std::arg(best_bin);
         if (have_prev) {
             float d = phase - prev_phase;
-            while (d > float(M_PI)) d -= 2.0f * float(M_PI);
-            while (d < -float(M_PI)) d += 2.0f * float(M_PI);
+            while (d > PI) d -= 2.0f * PI;
+            while (d < -PI) d += 2.0f * PI;
             phase_diff += d;
         }
         prev_phase = phase;
@@ -139,7 +139,7 @@ void estimate_offsets(lora_workspace* ws,
     float cfo_fine = 0.0f;
     if (symbols > 1)
         cfo_fine = (phase_diff / static_cast<float>(symbols - 1)) /
-                   (2.0f * float(M_PI) * static_cast<float>(N));
+                   (2.0f * PI * static_cast<float>(N));
     ws->metrics.cfo = cfo_coarse + cfo_fine;
     float frac = avg_index - std::floor(avg_index + 0.5f);
     float avg_t = static_cast<float>(sum_t) / static_cast<float>(symbols);
@@ -156,7 +156,8 @@ void compensate_offsets(const lora_workspace* ws,
     size_t N = size_t(1) << sf;
     float cfo = ws->metrics.cfo;
     float to = ws->metrics.time_offset;
-    float rate = -2.0f * float(M_PI) * cfo / (static_cast<float>(N) * static_cast<float>(osr));
+    float rate = -2.0f * PI * cfo /
+                 (static_cast<float>(N) * static_cast<float>(osr));
     for (size_t n = 0; n < sample_count; ++n) {
         float ph = rate * static_cast<float>(n);
         float cs = std::cos(ph);
@@ -198,7 +199,7 @@ ssize_t demodulate(lora_workspace* ws,
     kissfft<float> fft(ws->plan_fwd);
     LoRaDetector<float> detector(N, ws->fft_in, ws->fft_out, fft);
     int t_off = static_cast<int>(std::round(ws->metrics.time_offset));
-    float rate = -2.0f * float(M_PI) * ws->metrics.cfo / static_cast<float>(N);
+    float rate = -2.0f * PI * ws->metrics.cfo / static_cast<float>(N);
     uint16_t sw0 = 0, sw1 = 0;
     for (size_t s = 0; s < total_symbols; ++s) {
         float tmp = 0.0f;

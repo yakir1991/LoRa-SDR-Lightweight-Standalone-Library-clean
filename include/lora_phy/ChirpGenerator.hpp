@@ -4,6 +4,7 @@
 #pragma once
 #include <complex>
 #include <cmath>
+#include <lora_phy/phy.hpp>
 
 /*!
  * Generate a chirp into a caller supplied buffer.  `samps` must reference at
@@ -24,9 +25,9 @@ template <typename Type>
 int genChirp(std::complex<Type> *samps, int N, int osr, int NN, Type f0, bool down,
              const Type ampl, Type &phaseAccum, Type bw_scale = Type(1))
 {
-    const Type fMin = -M_PI * bw_scale / osr;
-    const Type fMax = M_PI * bw_scale / osr;
-    const Type fStep = (2 * M_PI * bw_scale) / (N * osr * osr);
+    const Type fMin = -lora_phy::PI * bw_scale / osr;
+    const Type fMax = lora_phy::PI * bw_scale / osr;
+    const Type fStep = (2 * lora_phy::PI * bw_scale) / (N * osr * osr);
     float f = fMin + f0;
     int i;
     if (down) {
@@ -45,6 +46,6 @@ int genChirp(std::complex<Type> *samps, int N, int osr, int NN, Type f0, bool do
             samps[i] = std::polar(ampl, phaseAccum);
         }
     }
-    phaseAccum -= floor(phaseAccum / (2 * M_PI)) * 2 * M_PI;
+    phaseAccum -= floor(phaseAccum / (2 * lora_phy::PI)) * 2 * lora_phy::PI;
     return i;
 }
