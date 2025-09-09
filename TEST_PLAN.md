@@ -5,8 +5,8 @@
 See also: [API Specification](API_SPEC.md), [Porting Notes](PORTING_NOTES.md), [Third-Party Components](THIRD_PARTY.md)
 
 ## Overview
-This document outlines how the library is validated. Detailed build and execution
-steps are provided in [README_TESTING.md](README_TESTING.md).
+This document outlines how the library is validated. Build and execution steps are
+documented in the project [README](README.md).
 
 ## Bit-Exact Regression Tests
 Verifies modulation and demodulation against deterministic reference vectors.
