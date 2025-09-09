@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cmath>
 #include <new>
+#include <cerrno>
 
 namespace lora_phy {
 
@@ -46,7 +47,7 @@ void lora_demod_free(lora_demod_workspace* ws)
     ws->scratch_len = 0;
 }
 
-size_t lora_demodulate(lora_demod_workspace* ws,
+ssize_t lora_demodulate(lora_demod_workspace* ws,
                        const std::complex<float>* samples, size_t sample_count,
                        uint16_t* out_symbols, unsigned osr,
                        uint8_t* out_sync)
@@ -67,7 +68,7 @@ size_t lora_demodulate(lora_demod_workspace* ws,
     }
     if (max_amp > 1.0f) {
         if (!ws->scratch || ws->scratch_len < sample_count) {
-            return 0;
+            return -ERANGE;
         }
         float scale = 1.0f / max_amp;
         for (size_t i = 0; i < sample_count; ++i) {
@@ -191,7 +192,8 @@ size_t lora_demodulate(lora_demod_workspace* ws,
         }
     }
 
-    return have_sync ? out_idx : total_symbols;
+    return have_sync ? static_cast<ssize_t>(out_idx)
+                     : static_cast<ssize_t>(total_symbols);
 }
 
 } // namespace lora_phy
