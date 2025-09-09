@@ -116,8 +116,9 @@ ssize_t encode(lora_workspace* ws,
                uint16_t* symbols, size_t symbol_cap);
 
 /** Decode @p symbols into the caller provided @p payload buffer.  The buffer
- * must have space for @p payload_cap bytes.  Returns bytes written or
- * -ERANGE if the buffer is too small, -EINVAL for invalid arguments. */
+ * must have space for @p payload_cap bytes and @p symbol_count must be even.
+ * Returns bytes written or -ERANGE if the buffer is too small,
+ * -EINVAL for invalid arguments or odd symbol counts. */
 ssize_t decode(lora_workspace* ws,
                const uint16_t* symbols, size_t symbol_count,
                uint8_t* payload, size_t payload_cap);
@@ -217,9 +218,10 @@ ssize_t lora_demodulate(lora_demod_workspace* ws,
 size_t lora_encode(const uint8_t* bytes, size_t byte_count,
                    uint16_t* out_symbols, unsigned sf);
 
-// Decode symbols produced by lora_encode back into bytes.
-size_t lora_decode(const uint16_t* symbols, size_t symbol_count,
-                   uint8_t* out_bytes);
+// Decode symbols produced by lora_encode back into bytes. @p symbol_count must
+// be even. Returns bytes written or -EINVAL when the count is odd.
+ssize_t lora_decode(const uint16_t* symbols, size_t symbol_count,
+                    uint8_t* out_bytes);
 
 } // namespace lora_phy
 

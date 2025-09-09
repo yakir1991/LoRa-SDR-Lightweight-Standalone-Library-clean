@@ -246,17 +246,18 @@ ssize_t decode(lora_workspace* ws,
                const uint16_t* symbols, size_t symbol_count,
                uint8_t* payload, size_t payload_cap) {
     if (!ws || !symbols || !payload) return -EINVAL;
-    size_t produced = lora_decode(symbols, symbol_count, payload);
-    if (produced > payload_cap) return -ERANGE;
+    ssize_t produced = lora_decode(symbols, symbol_count, payload);
+    if (produced < 0) return produced;
+    if (static_cast<size_t>(produced) > payload_cap) return -ERANGE;
     if (produced >= 4) {
-        size_t data_len = produced - 4;
+        size_t data_len = static_cast<size_t>(produced) - 4;
         uint16_t provided = payload[produced - 2] | (payload[produced - 1] << 8);
         uint16_t calc = sx1272DataChecksum(payload + 2, data_len);
         ws->metrics.crc_ok = (provided == calc);
     } else {
         ws->metrics.crc_ok = false;
     }
-    return static_cast<ssize_t>(produced);
+    return produced;
 }
 
 const lora_metrics* get_last_metrics(const lora_workspace* ws) {
