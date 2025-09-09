@@ -1,0 +1,4 @@
+[submodule "external/LoRa-SDR"]
+	path = external/LoRa-SDR
+	url = https://github.com/myriadrf/LoRa-SDR.git
+	branch = master

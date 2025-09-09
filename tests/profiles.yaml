@@ -1,0 +1,45 @@
+# Representative LoRa profiles used by tests
+# Fields: name, sf (spreading factor), bw (Hz), cr (coding rate),
+# and optional dir for vector data.
+-
+  name: sf7_bw125_cr45
+  sf: 7
+  bw: 125000
+  cr: 4/5
+  dir: vectors/lora_sdr_extracted/encoder_decoder_tests.json
+-
+  name: sf7_bw125_cr47
+  sf: 7
+  bw: 125000
+  cr: 4/7
+  dir: vectors/lora_sdr_extracted/loopback_tests.json
+-
+  name: sf8_bw125_cr45
+  sf: 8
+  bw: 125000
+  cr: 4/5
+  dir: vectors/lora_sdr_extracted/encoder_decoder_tests.json
+-
+  name: sf9_bw250_cr48
+  sf: 9
+  bw: 250000
+  cr: 4/8
+  dir: vectors/lora_sdr_extracted/encoder_decoder_tests.json
+-
+  name: sf10_bw250_cr47
+  sf: 10
+  bw: 250000
+  cr: 4/7
+  dir: vectors/lora_sdr_extracted/loopback_tests.json
+-
+  name: sf11_bw500_cr45
+  sf: 11
+  bw: 500000
+  cr: 4/5
+  dir: vectors/lora_sdr_extracted/encoder_decoder_tests.json
+-
+  name: sf12_bw500_cr45
+  sf: 12
+  bw: 500000
+  cr: 4/5
+  dir: vectors/lora_sdr_extracted/encoder_decoder_tests.json

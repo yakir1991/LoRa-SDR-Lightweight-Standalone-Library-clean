@@ -1,0 +1,46 @@
+# Build directories
+build/
+cmake-build-*/
+
+# Generated files
+*.o
+*.so
+*.a
+*.exe
+*.dll
+*.dylib
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# Test outputs
+test_results/
+*.log
+
+# Large vector files (not golden vectors)
+vectors/lora_sdr_reference/
+vectors_binary/
+*.bin
+!vectors/golden/*.bin
+
+# Temporary files
+*.tmp
+*.temp

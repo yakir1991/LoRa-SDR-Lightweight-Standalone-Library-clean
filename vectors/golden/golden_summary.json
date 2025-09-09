@@ -1,0 +1,91 @@
+{
+  "vector_types": [
+    {
+      "name": "hamming_tests",
+      "description": "Essential Hamming code test vectors (8/4, 7/4)",
+      "file": "vectors/golden/hamming_tests.bin",
+      "format": "binary",
+      "purpose": "Bit-exact testing of error correction codes",
+      "size": "32 tests"
+    },
+    {
+      "name": "modulation_tests",
+      "description": "Essential LoRa modulation test vectors",
+      "file": "vectors/golden/modulation_tests.bin",
+      "format": "binary",
+      "purpose": "Testing payload to IQ conversion",
+      "size": "42 tests (6 configs \u00d7 7 payloads)"
+    },
+    {
+      "name": "detection_tests",
+      "description": "Essential symbol detection test vectors",
+      "file": "vectors/golden/detection_tests.bin",
+      "format": "binary",
+      "purpose": "Testing FFT-based symbol detection",
+      "size": "6 tests (key SF only)"
+    },
+    {
+      "name": "awgn_tests",
+      "description": "AWGN noise test vectors",
+      "file": "vectors/golden/awgn_tests.bin",
+      "format": "binary",
+      "purpose": "Testing performance under noise conditions",
+      "size": "36 tests (3 configs \u00d7 3 payloads \u00d7 4 SNR levels)"
+    },
+    {
+      "name": "interleaver_tests",
+      "description": "Interleaver test vectors",
+      "file": "vectors/golden/interleaver_tests.bin",
+      "format": "binary",
+      "purpose": "Testing bit reordering for error resilience",
+      "size": "15 tests (3 SF \u00d7 5 test cases)"
+    },
+    {
+      "name": "crc_tests",
+      "description": "CRC test vectors",
+      "file": "vectors/golden/crc_tests.bin",
+      "format": "binary",
+      "purpose": "Testing cyclic redundancy check",
+      "size": "5 tests (different payload types)"
+    },
+    {
+      "name": "sync_word_tests",
+      "description": "Sync word test vectors",
+      "file": "vectors/golden/sync_word_tests.bin",
+      "format": "binary",
+      "purpose": "Testing synchronization word detection",
+      "size": "9 tests (3 SF \u00d7 3 test cases)"
+    },
+    {
+      "name": "performance_tests",
+      "description": "Performance test vectors",
+      "file": "vectors/golden/performance_tests.bin",
+      "format": "binary",
+      "purpose": "Testing timing and memory usage",
+      "size": "5 tests (different configurations)"
+    }
+  ],
+  "test_configurations": [
+    "SF7/9/12 \u00d7 BW 125/250/500 kHz \u00d7 CR 4/5, 4/8",
+    "Explicit header mode",
+    "CRC enabled",
+    "Whitening enabled",
+    "Interleaving enabled"
+  ],
+  "test_payloads": [
+    "Text payloads: 'Hello', 'World', 'Test', 'LoRa'",
+    "Binary data: 0x01-0x08",
+    "Edge cases: all zeros, all ones"
+  ],
+  "snr_values": [
+    0,
+    10,
+    20,
+    30
+  ],
+  "generation_date": "2024-09-09",
+  "based_on": "Essential test cases with extended coverage",
+  "format": "binary",
+  "size": "Optimized for comprehensive testing",
+  "total_tests": 150
+}
