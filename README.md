@@ -30,8 +30,8 @@ make
 ### Running Tests
 
 ```bash
-# Run tests with golden vectors
-./test_runner
+# Run lora_phy_tests with golden vectors
+./lora_phy_tests
 ```
 
 ### Using the Library
