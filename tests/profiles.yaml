@@ -6,40 +6,40 @@
   sf: 7
   bw: 125000
   cr: 4/5
-  dir: vectors/lora_sdr_extracted/encoder_decoder_tests.json
+  dir: vectors/golden
 -
   name: sf7_bw125_cr47
   sf: 7
   bw: 125000
   cr: 4/7
-  dir: vectors/lora_sdr_extracted/loopback_tests.json
+  dir: vectors/golden
 -
   name: sf8_bw125_cr45
   sf: 8
   bw: 125000
   cr: 4/5
-  dir: vectors/lora_sdr_extracted/encoder_decoder_tests.json
+  dir: vectors/golden
 -
   name: sf9_bw250_cr48
   sf: 9
   bw: 250000
   cr: 4/8
-  dir: vectors/lora_sdr_extracted/encoder_decoder_tests.json
+  dir: vectors/golden
 -
   name: sf10_bw250_cr47
   sf: 10
   bw: 250000
   cr: 4/7
-  dir: vectors/lora_sdr_extracted/loopback_tests.json
+  dir: vectors/golden
 -
   name: sf11_bw500_cr45
   sf: 11
   bw: 500000
   cr: 4/5
-  dir: vectors/lora_sdr_extracted/encoder_decoder_tests.json
+  dir: vectors/golden
 -
   name: sf12_bw500_cr45
   sf: 12
   bw: 500000
   cr: 4/5
-  dir: vectors/lora_sdr_extracted/encoder_decoder_tests.json
+  dir: vectors/golden

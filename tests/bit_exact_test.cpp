@@ -4,7 +4,6 @@
 #include <cstdint>
 #include <fstream>
 #include <iostream>
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -52,29 +51,57 @@ static bool load_profiles(const std::string& path, std::vector<Profile>& out) {
     return true;
 }
 
-static bool load_iq_samples(const std::string& path, std::vector<std::complex<float>>& out) {
-    std::ifstream f(path);
-    if (!f) return false;
-    std::string line;
-    while (std::getline(f, line)) {
-        line = trim(line);
-        if (line.empty()) continue;
-        std::stringstream ss(line);
-        float re, im;
-        char comma;
-        if (!(ss >> re)) return false;
-        if (!(ss >> comma)) return false;
-        if (!(ss >> im)) return false;
-        out.emplace_back(re, im);
-    }
-    return true;
+static unsigned cr_to_idx(const std::string& cr) {
+    if (cr == "4/5") return 1;
+    if (cr == "4/6") return 2;
+    if (cr == "4/7") return 3;
+    if (cr == "4/8") return 4;
+    return 0;
 }
 
-static bool load_payload(const std::string& path, std::vector<uint8_t>& out) {
+static bool load_from_bin(const std::string& path, const Profile& p,
+                          std::vector<std::complex<float>>& samples,
+                          std::vector<uint8_t>& payload) {
     std::ifstream f(path, std::ios::binary);
     if (!f) return false;
-    out.assign(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
-    return true;
+    auto read_u32 = [&](uint32_t& v) {
+        return static_cast<bool>(f.read(reinterpret_cast<char*>(&v), sizeof(v)));
+    };
+    uint32_t count = 0;
+    if (!read_u32(count)) return false;
+    const unsigned bw_khz = p.bw / 1000;
+    const unsigned cr_idx = cr_to_idx(p.cr);
+    for (uint32_t i = 0; i < count; ++i) {
+        uint32_t sf_raw, bw_raw, cr_raw, flags_raw, len_raw;
+        if (!(read_u32(sf_raw) && read_u32(bw_raw) && read_u32(cr_raw) &&
+              read_u32(flags_raw) && read_u32(len_raw)))
+            return false;
+        const unsigned sf = sf_raw >> 8;
+        const unsigned bw = bw_raw >> 8;
+        const unsigned cr = cr_raw >> 8;
+        const unsigned len = len_raw >> 8;
+        char reserved;
+        if (!f.read(&reserved, 1)) return false;
+        std::vector<uint8_t> pay(len);
+        if (!f.read(reinterpret_cast<char*>(pay.data()), len)) return false;
+        uint32_t sample_count = 0;
+        if (!read_u32(sample_count)) return false;
+        std::vector<double> tmp(sample_count * 2);
+        if (!f.read(reinterpret_cast<char*>(tmp.data()),
+                    tmp.size() * sizeof(double)))
+            return false;
+        if (sf == p.sf && bw == bw_khz && cr == cr_idx) {
+            samples.resize(sample_count);
+            for (uint32_t s = 0; s < sample_count; ++s) {
+                samples[s] =
+                    std::complex<float>(static_cast<float>(tmp[2 * s]),
+                                         static_cast<float>(tmp[2 * s + 1]));
+            }
+            payload = std::move(pay);
+            return true;
+        }
+    }
+    return false;
 }
 
 int main() {
@@ -91,15 +118,11 @@ int main() {
             continue;
         }
         std::vector<std::complex<float>> samples;
-        if (!load_iq_samples(p.dir + "/iq_samples.csv", samples)) {
-            std::cerr << "Failed to load IQ samples for profile " << p.name << "\n";
-            ok = false;
-            continue;
-        }
         std::vector<uint8_t> expected;
-        // golden payload produced by the reference pipeline
-        if (!load_payload(p.dir + "/decoded.bin", expected)) {
-            std::cerr << "Failed to load decoded payload for profile " << p.name << "\n";
+        if (!load_from_bin(p.dir + "/modulation_tests.bin", p, samples,
+                           expected)) {
+            std::cerr << "Failed to load vectors for profile " << p.name
+                      << "\n";
             ok = false;
             continue;
         }
