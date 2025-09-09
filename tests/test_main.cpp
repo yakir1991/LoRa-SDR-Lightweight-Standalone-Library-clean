@@ -12,6 +12,7 @@ int error_code_test_main();
 int odd_symbol_count_test_main();
 int scratch_buffer_error_test_main();
 int lorawan_mic_test_main();
+int base64_utils_test_main();
 
 int main() {
     int result = 0;
@@ -27,6 +28,7 @@ int main() {
     result |= odd_symbol_count_test_main();
     result |= scratch_buffer_error_test_main();
     result |= lorawan_mic_test_main();
+    result |= base64_utils_test_main();
     if (result != 0) {
         std::printf("Some tests failed\n");
     }
