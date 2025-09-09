@@ -203,10 +203,13 @@ size_t lora_modulate(const uint16_t* symbols, size_t symbol_count,
                      uint8_t sync = 0x12);
 
 // Demodulate complex samples into symbol indices using a prepared workspace.
-size_t lora_demodulate(lora_demod_workspace* ws,
-                       const std::complex<float>* samples, size_t sample_count,
-                       uint16_t* out_symbols, unsigned osr,
-                       uint8_t* out_sync = nullptr);
+// Returns the number of symbols produced or -ERANGE when the scratch buffer
+// inside ``ws`` is missing or too small to normalise inputs that exceed the
+// canonical [-1.0, 1.0] range.
+ssize_t lora_demodulate(lora_demod_workspace* ws,
+                        const std::complex<float>* samples, size_t sample_count,
+                        uint16_t* out_symbols, unsigned osr,
+                        uint8_t* out_sync = nullptr);
 
 // Simple Hamming(8,4) based encoder. Each input byte becomes two symbols.
 size_t lora_encode(const uint8_t* bytes, size_t byte_count,

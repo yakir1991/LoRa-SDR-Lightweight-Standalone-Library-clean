@@ -55,9 +55,9 @@ int main() {
                               scratch.data(), scratch.size());
     uint8_t out_sync = 0;
     std::vector<uint16_t> dummy(1);
-    size_t produced = lora_phy::lora_demodulate(&ws, samples.data(),
-                                                sample_count, dummy.data(), 1,
-                                                &out_sync);
+    ssize_t produced = lora_phy::lora_demodulate(&ws, samples.data(),
+                                                 sample_count, dummy.data(), 1,
+                                                 &out_sync);
     lora_phy::lora_demod_free(&ws);
 
     bool ok = same && produced == 0 && out_sync == sync;
