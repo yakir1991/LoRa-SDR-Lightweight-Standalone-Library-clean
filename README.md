@@ -74,9 +74,14 @@ auto decoded_payload = phy.demodulate(iq_samples);
 
 The `vectors/golden/` directory contains essential test vectors:
 
-- `hamming_tests.bin`: Hamming code test vectors
-- `modulation_tests.bin`: Modulation test vectors  
-- `detection_tests.bin`: Symbol detection test vectors
+- `awgn_tests.bin`: Additive white Gaussian noise channel simulations
+- `crc_tests.bin`: CRC calculation and verification cases
+- `detection_tests.bin`: Symbol detection and synchronization scenarios
+- `hamming_tests.bin`: Hamming code encoding/decoding checks
+- `interleaver_tests.bin`: Bit interleaving and deinterleaving patterns
+- `modulation_tests.bin`: Modulation and demodulation round-trip samples
+- `performance_tests.bin`: Stress cases for performance benchmarking
+- `sync_word_tests.bin`: Sync word generation and detection data
 
 These vectors are generated from the original LoRa-SDR submodule and provide bit-exact validation.
 
