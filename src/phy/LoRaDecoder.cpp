@@ -1,11 +1,13 @@
 #include <lora_phy/LoRaCodes.hpp>
 #include <lora_phy/phy.hpp>
+#include <cerrno>
 
 namespace lora_phy {
 
-size_t lora_decode(const uint16_t* symbols, size_t symbol_count,
-                   uint8_t* out_bytes)
+ssize_t lora_decode(const uint16_t* symbols, size_t symbol_count,
+                    uint8_t* out_bytes)
 {
+    if (symbol_count % 2 != 0) return -EINVAL;
     size_t byte_idx = 0;
     for (size_t i = 0; i + 1 < symbol_count; i += 2)
     {
@@ -15,7 +17,7 @@ size_t lora_decode(const uint16_t* symbols, size_t symbol_count,
         uint8_t lo = decodeHamming84sx(static_cast<uint8_t>(symbols[i + 1]), err, bad) & 0x0f;
         out_bytes[byte_idx++] = static_cast<uint8_t>((hi << 4) | lo);
     }
-    return byte_idx;
+    return static_cast<ssize_t>(byte_idx);
 }
 
 } // namespace lora_phy
