@@ -5,6 +5,7 @@
 
 #include <cmath>
 #include <algorithm>
+#include <cerrno>
 
 namespace lora_phy {
 
@@ -24,7 +25,7 @@ static unsigned get_osr(const lora_workspace* ws) {
 } // namespace
 
 int init(lora_workspace* ws, const lora_params* cfg) {
-    if (!ws || !cfg) return -1;
+    if (!ws || !cfg) return -EINVAL;
     const int N = 1 << cfg->sf;
     kissfft<float>::init(ws->plan_fwd, N, false);
     kissfft<float>::init(ws->plan_inv, N, true);
@@ -33,6 +34,8 @@ int init(lora_workspace* ws, const lora_params* cfg) {
     ws->bw = cfg->bw;
     ws->sync_word = cfg->sync_word;
     ws->window_kind = cfg->window;
+    if (ws->window_kind != window_type::window_none && !ws->window)
+        return -ENOMEM;
     if (ws->window) {
         if (ws->window_kind == window_type::window_hann) {
             for (int i = 0; i < N; ++i) {
@@ -55,23 +58,23 @@ void reset(lora_workspace* ws) {
 ssize_t encode(lora_workspace* ws,
                const uint8_t* payload, size_t payload_len,
                uint16_t* symbols, size_t symbol_cap) {
-    if (!ws || !payload || !symbols) return -1;
+    if (!ws || !payload || !symbols) return -EINVAL;
     unsigned sf = deduce_sf(ws);
     size_t produced = lora_encode(payload, payload_len, symbols, sf);
-    if (produced > symbol_cap) return -1;
+    if (produced > symbol_cap) return -ERANGE;
     return static_cast<ssize_t>(produced);
 }
 
 ssize_t modulate(lora_workspace* ws,
                  const uint16_t* symbols, size_t symbol_count,
                  std::complex<float>* iq, size_t iq_cap) {
-    if (!ws || !symbols || !iq) return -1;
+    if (!ws || !symbols || !iq) return -EINVAL;
     unsigned sf = deduce_sf(ws);
     unsigned osr = get_osr(ws);
     size_t produced =
         lora_modulate(symbols, symbol_count, iq, sf, osr, ws->bw, 1.0f,
                       ws->sync_word);
-    if (produced > iq_cap) return -1;
+    if (produced > iq_cap) return -ERANGE;
     return static_cast<ssize_t>(produced);
 }
 
@@ -178,16 +181,16 @@ void compensate_offsets(const lora_workspace* ws,
 ssize_t demodulate(lora_workspace* ws,
                    const std::complex<float>* iq, size_t sample_count,
                    uint16_t* symbols, size_t symbol_cap) {
-    if (!ws || !iq || !symbols) return -1;
+    if (!ws || !iq || !symbols) return -EINVAL;
     unsigned sf = deduce_sf(ws);
     unsigned osr = get_osr(ws);
     size_t N = size_t(1) << sf;
     size_t step = N * osr;
-    if (sample_count % step != 0) return -1;
+    if (sample_count % step != 0) return -EINVAL;
     size_t total_symbols = sample_count / step;
-    if (total_symbols < 2) return -1;
+    if (total_symbols < 2) return -ERANGE;
     size_t num_symbols = total_symbols - 2;
-    if (num_symbols > symbol_cap) return -1;
+    if (num_symbols > symbol_cap) return -ERANGE;
 
     size_t est_samples = std::min(sample_count, step * size_t(2));
     estimate_offsets(ws, iq, est_samples);
@@ -241,9 +244,9 @@ ssize_t demodulate(lora_workspace* ws,
 ssize_t decode(lora_workspace* ws,
                const uint16_t* symbols, size_t symbol_count,
                uint8_t* payload, size_t payload_cap) {
-    if (!ws || !symbols || !payload) return -1;
+    if (!ws || !symbols || !payload) return -EINVAL;
     size_t produced = lora_decode(symbols, symbol_count, payload);
-    if (produced > payload_cap) return -1;
+    if (produced > payload_cap) return -ERANGE;
     if (produced >= 4) {
         size_t data_len = produced - 4;
         uint16_t provided = payload[produced - 2] | (payload[produced - 1] << 8);

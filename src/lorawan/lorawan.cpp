@@ -1,6 +1,7 @@
 #include <lorawan/lorawan.hpp>
 
 #include <algorithm>
+#include <cerrno>
 
 namespace lorawan {
 
@@ -31,9 +32,9 @@ ssize_t build_frame(lora_phy::lora_workspace* ws,
                     size_t symbol_cap,
                     uint8_t* tmp_bytes,
                     size_t tmp_cap) {
-    if (!ws || !symbols || !tmp_bytes) return -1;
+    if (!ws || !symbols || !tmp_bytes) return -EINVAL;
     size_t needed = 1 + 4 + 1 + 2 + frame.fhdr.fopts.size() + frame.payload.size() + 4;
-    if (needed > tmp_cap) return -1;
+    if (needed > tmp_cap) return -ERANGE;
     size_t idx = 0;
     uint8_t mhdr = (static_cast<uint8_t>(frame.mhdr.mtype) << 5) |
                    (frame.mhdr.major & 0x3);
@@ -66,17 +67,17 @@ ssize_t parse_frame(lora_phy::lora_workspace* ws,
                     Frame& out,
                     uint8_t* tmp_bytes,
                     size_t tmp_cap) {
-    if (!ws || !symbols || !tmp_bytes) return -1;
+    if (!ws || !symbols || !tmp_bytes) return -EINVAL;
     size_t byte_cap = tmp_cap;
     ssize_t produced = lora_phy::decode(ws, symbols, symbol_count,
                                         tmp_bytes, byte_cap);
     if (produced < 0) return produced;
-    if (static_cast<size_t>(produced) < 1 + 4 + 1 + 2 + 4) return -1;
+    if (static_cast<size_t>(produced) < 1 + 4 + 1 + 2 + 4) return -ERANGE;
     size_t len = static_cast<size_t>(produced);
     uint32_t mic = tmp_bytes[len - 4] | (tmp_bytes[len - 3] << 8) |
                    (tmp_bytes[len - 2] << 16) | (tmp_bytes[len - 1] << 24);
     uint32_t calc = compute_mic(tmp_bytes, len - 4);
-    if (mic != calc) return -2;
+    if (mic != calc) return -EINVAL;
     size_t idx = 0;
     uint8_t mhdr = tmp_bytes[idx++];
     out.mhdr.mtype = static_cast<MType>(mhdr >> 5);
@@ -88,7 +89,7 @@ ssize_t parse_frame(lora_phy::lora_workspace* ws,
     unsigned fopts_len = out.fhdr.fctrl & 0x0F;
     out.fhdr.fcnt = tmp_bytes[idx] | (tmp_bytes[idx + 1] << 8);
     idx += 2;
-    if (idx + fopts_len > len - 4) return -1;
+    if (idx + fopts_len > len - 4) return -ERANGE;
     out.fhdr.fopts.assign(tmp_bytes + idx, tmp_bytes + idx + fopts_len);
     idx += fopts_len;
     out.payload.assign(tmp_bytes + idx, tmp_bytes + (len - 4));

@@ -96,9 +96,9 @@ struct lora_workspace {
 // ---------------------------------------------------------------------------
 
 /** Initialise the workspace for a given parameter set.  Returns 0 on success
- * or -EINVAL when parameters are invalid.  The workspace and the buffers it
- * references are owned by the caller and must remain valid for subsequent
- * calls. */
+ * or -EINVAL when parameters are invalid, -ENOMEM if a required buffer is
+ * missing.  The workspace and the buffers it references are owned by the
+ * caller and must remain valid for subsequent calls. */
 int init(lora_workspace* ws, const lora_params* cfg);
 
 /** Reset runtime counters and metric fields in @p ws without touching the
@@ -107,30 +107,32 @@ void reset(lora_workspace* ws);
 
 /** Encode @p payload into @p symbols.  @p symbols must point to a caller
  * provided buffer of at least @p symbol_cap entries.  Returns the number of
- * symbols written or -ERANGE if the buffer is too small. */
+ * symbols written or -ERANGE if the buffer is too small, -EINVAL for invalid
+ * arguments. */
 ssize_t encode(lora_workspace* ws,
                const uint8_t* payload, size_t payload_len,
                uint16_t* symbols, size_t symbol_cap);
 
 /** Decode @p symbols into the caller provided @p payload buffer.  The buffer
- * must have space for @p payload_cap bytes.  Returns bytes written or a
- * negative error code on failure. */
+ * must have space for @p payload_cap bytes.  Returns bytes written or
+ * -ERANGE if the buffer is too small, -EINVAL for invalid arguments. */
 ssize_t decode(lora_workspace* ws,
                const uint16_t* symbols, size_t symbol_count,
                uint8_t* payload, size_t payload_cap);
 
 /** Modulate symbols into complex baseband samples.  @p iq must reference a
- * buffer with capacity for @p symbol_count * (1<<sf) * osr samples.  The function
- * returns the number of samples produced or -ERANGE if @p iq_cap is
- * insufficient. */
+ * buffer with capacity for @p symbol_count * (1<<sf) * osr samples.  The
+ * function returns the number of samples produced or -ERANGE if @p iq_cap is
+ * insufficient, -EINVAL for invalid arguments. */
 ssize_t modulate(lora_workspace* ws,
                  const uint16_t* symbols, size_t symbol_count,
                  std::complex<float>* iq, size_t iq_cap);
 
 /** Demodulate @p iq samples into @p symbols using the FFT plans inside @p ws.
  * The input length must be a multiple of the oversampled symbol size
- * ((1<<sf) * osr).  Returns number of symbols produced or a negative error
- * code. */
+ * ((1<<sf) * osr).  Returns number of symbols produced or -ERANGE if
+ * @p symbol_cap is insufficient or the input contains fewer than two symbols,
+ * -EINVAL for invalid arguments or inconsistent sample counts. */
 ssize_t demodulate(lora_workspace* ws,
                    const std::complex<float>* iq, size_t sample_count,
                    uint16_t* symbols, size_t symbol_cap);

@@ -8,6 +8,7 @@ int roundtrip_test_main();
 int whitening_test_main();
 int equal_power_bin_test_main();
 int sync_word_test_main();
+int error_code_test_main();
 
 int main() {
     int result = 0;
@@ -19,6 +20,7 @@ int main() {
     result |= whitening_test_main();
     result |= equal_power_bin_test_main();
     result |= sync_word_test_main();
+    result |= error_code_test_main();
     if (result != 0) {
         std::printf("Some tests failed\n");
     }
