@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(lora_phy LANGUAGES CXX)
+project(lora_phy LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -40,7 +40,7 @@ if(BUILD_TESTS)
     file(GLOB TEST_SOURCES CONFIGURE_DEPENDS tests/*.cpp)
     list(REMOVE_ITEM TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_main.cpp)
 
-    add_executable(lora_phy_tests tests/test_main.cpp ${TEST_SOURCES} src/lorawan/lorawan.cpp)
+    add_executable(lora_phy_tests tests/test_main.cpp ${TEST_SOURCES} src/lorawan/lorawan.cpp src/lorawan/aes.c)
     target_link_libraries(lora_phy_tests PRIVATE lora_phy)
 
     foreach(test_src ${TEST_SOURCES})

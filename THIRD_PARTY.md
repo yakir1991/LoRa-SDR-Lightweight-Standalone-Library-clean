@@ -19,3 +19,9 @@ This project incorporates external code and artifacts. The sections below credit
 - **Local modifications:** Code was refactored to remove the Pothos framework, rely solely on KISS FFT, and avoid runtime allocations.
 - **Vector regeneration:** Baseline vectors can be reproduced using `scripts/generate_baseline_vectors.py`, which invokes `scripts/generate_vectors.sh` and the original LoRa-SDR binary. The generated vectors are stored under `legacy_vectors/lorasdr_baseline`.
 
+## tiny-AES-c
+- **Source:** [https://github.com/kokke/tiny-AES-c](https://github.com/kokke/tiny-AES-c)
+- **License:** Unlicense / Public Domain
+- **Usage:** Provides the AES-128 block cipher used for CMAC-based MIC calculation.
+- **Local modifications:** CBC and CTR modes were disabled and the header was wrapped for C++ consumption.
+

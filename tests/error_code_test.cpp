@@ -112,29 +112,30 @@ int main() {
     frame.payload = {0xAA};
     std::vector<uint16_t> lora_syms(64);
     std::vector<uint8_t> tmp(64);
-    if (build_frame(nullptr, frame, lora_syms.data(), lora_syms.size(), tmp.data(), tmp.size()) != -EINVAL) {
+    uint8_t nwk_skey[16] = {};
+    if (build_frame(nullptr, nwk_skey, frame, lora_syms.data(), lora_syms.size(), tmp.data(), tmp.size()) != -EINVAL) {
         std::cerr << "build_frame null" << std::endl;
         ok = false;
     }
-    if (build_frame(&ws, frame, lora_syms.data(), lora_syms.size(), tmp.data(), 1) != -ERANGE) {
+    if (build_frame(&ws, nwk_skey, frame, lora_syms.data(), lora_syms.size(), tmp.data(), 1) != -ERANGE) {
         std::cerr << "build_frame small tmp" << std::endl;
         ok = false;
     }
 
     // lorawan parse_frame errors
     Frame out_frame;
-    if (parse_frame(nullptr, lora_syms.data(), 0, out_frame, tmp.data(), tmp.size()) != -EINVAL) {
+    if (parse_frame(nullptr, nwk_skey, lora_syms.data(), 0, out_frame, tmp.data(), tmp.size()) != -EINVAL) {
         std::cerr << "parse_frame null" << std::endl;
         ok = false;
     }
-    if (parse_frame(&ws, lora_syms.data(), 0, out_frame, tmp.data(), tmp.size()) != -ERANGE) {
+    if (parse_frame(&ws, nwk_skey, lora_syms.data(), 0, out_frame, tmp.data(), tmp.size()) != -ERANGE) {
         std::cerr << "parse_frame short" << std::endl;
         ok = false;
     }
 
     // fopts overrun
     std::vector<uint8_t> bad_bytes = {0,0,0,0,0,0x05,0,0};
-    uint32_t mic = compute_mic(bad_bytes.data(), bad_bytes.size());
+    uint32_t mic = compute_mic(nwk_skey, true, 0, 0, bad_bytes.data(), bad_bytes.size());
     bad_bytes.push_back(static_cast<uint8_t>(mic & 0xFF));
     bad_bytes.push_back(static_cast<uint8_t>((mic >> 8) & 0xFF));
     bad_bytes.push_back(static_cast<uint8_t>((mic >> 16) & 0xFF));
@@ -142,7 +143,7 @@ int main() {
     std::vector<uint16_t> bad_syms(64);
     ssize_t s = encode(&ws, bad_bytes.data(), bad_bytes.size(), bad_syms.data(), bad_syms.size());
     if (s > 0) {
-        if (parse_frame(&ws, bad_syms.data(), static_cast<size_t>(s), out_frame, tmp.data(), tmp.size()) != -ERANGE) {
+        if (parse_frame(&ws, nwk_skey, bad_syms.data(), static_cast<size_t>(s), out_frame, tmp.data(), tmp.size()) != -ERANGE) {
             std::cerr << "parse_frame fopts" << std::endl;
             ok = false;
         }
@@ -152,10 +153,10 @@ int main() {
     }
 
     // MIC mismatch
-    ssize_t good = build_frame(&ws, frame, lora_syms.data(), lora_syms.size(), tmp.data(), tmp.size());
+    ssize_t good = build_frame(&ws, nwk_skey, frame, lora_syms.data(), lora_syms.size(), tmp.data(), tmp.size());
     if (good > 0) {
         lora_syms[0] ^= 1;
-        if (parse_frame(&ws, lora_syms.data(), static_cast<size_t>(good), out_frame, tmp.data(), tmp.size()) != -EINVAL) {
+        if (parse_frame(&ws, nwk_skey, lora_syms.data(), static_cast<size_t>(good), out_frame, tmp.data(), tmp.size()) != -EINVAL) {
             std::cerr << "parse_frame mic" << std::endl;
             ok = false;
         }
