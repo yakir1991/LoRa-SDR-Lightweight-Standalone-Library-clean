@@ -80,6 +80,12 @@ The `vectors/golden/` directory contains essential test vectors:
 
 These vectors are generated from the original LoRa-SDR submodule and provide bit-exact validation.
 
+**Note:** Before running any vector generation scripts, synchronize the `external/LoRa-SDR` submodule:
+
+```bash
+git submodule update --init --recursive
+```
+
 ## Testing
 
 The library includes comprehensive tests:
